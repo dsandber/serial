@@ -448,6 +448,14 @@ Serial::SerialImpl::reconfigurePort ()
 #endif
   }
 
+//  Dan added this.  For low latency.
+#if defined(__linux__) && defined (TIOCSSERIAL)
+   struct serial_struct ser;
+   ioctl(fd_, TIOCGSERIAL, &ser);
+   ser.flags |= ASYNC_LOW_LATENCY;
+   ioctl(fd_, TIOCSSERIAL, &ser);
+#endif
+
   // Update byte_time_ based on the new settings.
   uint32_t bit_time_ns = 1e9 / baudrate_;
   byte_time_ns_ = bit_time_ns * (1 + bytesize_ + parity_ + stopbits_);
